@@ -19,21 +19,19 @@ Built specifically for high-precision, timing-critical games like **Tekken** and
 
 ---
 
-## Quick Start (Windows 11)
+## 1-Click Automated Setup (Windows 11)
 
-### 1. Prerequisites (One-time)
-1. **ViGEmBus Driver (Windows):** Download and run the official installer from [ViGEmBus Releases](https://github.com/nefarius/ViGEmBus/releases).
-2. **Install Python dependencies:**
+Anyone can clone this repo and run it immediately—**all drivers and dependencies are downloaded and installed automatically**:
+
+1. Clone the repository:
    ```bash
-   pip install -r requirements.txt
+   git clone <repo-url>
+   cd controller
    ```
-
-### 2. Launch the Server
-Double click `run.bat` or run:
-```bash
-python run_controller.py
-```
-
+2. Double-click **`setup.bat`** (or run `python run_controller.py`).
+   - Automatically downloads and installs the official **ViGEmBus** Xbox gamepad driver if missing.
+   - Automatically installs required Python packages.
+   - Automatically starts the ultra-low latency controller bridge!
 The terminal will print the connection instructions:
 - **USB Cable (Lowest Latency < 1ms):**
   - Option A: Turn on **USB Tethering** in your Android phone settings.
@@ -62,6 +60,12 @@ If you connect your laptop to a TV or external monitor and want to close the lap
 2. Click **"Choose what closing the lid does"**.
 3. Under *When I close the lid* (Plugged in), select **"Do nothing"**.
 4. Now you can tuck the laptop away with the lid shut while playing games with your phone controller!
+
+### 6. Standalone Android APK Project
+A complete native Android app project is included in the `android/` directory:
+- Built with hardware acceleration, native immersive fullscreen, and low-latency vibration.
+- Bundles the controller UI internally inside APK assets (`android/app/src/main/assets/`).
+- Open the `android/` folder in Android Studio and click **Build APK** to generate a standalone `.apk` installable on any Android phone!
 ---
 
 ## Verification & Tests
