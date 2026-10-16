@@ -48,6 +48,20 @@ Open Google Chrome on your Android phone and navigate to the displayed URL (e.g.
 - Tap **Edit** to drag and resize buttons to your preference.
 - Play! Your laptop will recognize the controller as an authentic Xbox 360 gamepad immediately.
 
+
+### 4. Always Ready (Zero-Touch Startup)
+If you want the controller server to run automatically in the background without needing a terminal open:
+- Double-click **`install_autostart.bat`**.
+- Now, whenever your laptop boots or logs in, the controller bridge runs silently in the background (`pythonw.exe`, using negligible CPU/RAM).
+- Pick up your phone anytime, tap your home screen icon, and it connects immediately.
+- To remove auto-start at any time, run **`uninstall_autostart.bat`**.
+
+### 5. Playing with Laptop Closed (Lid Closed Mode)
+If you connect your laptop to a TV or external monitor and want to close the laptop lid:
+1. In Windows 11, search for **"Control Panel"** -> **"Power Options"**.
+2. Click **"Choose what closing the lid does"**.
+3. Under *When I close the lid* (Plugged in), select **"Do nothing"**.
+4. Now you can tuck the laptop away with the lid shut while playing games with your phone controller!
 ---
 
 ## Verification & Tests
