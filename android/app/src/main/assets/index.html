@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#07090e">
+  <title>Gamepad Controller</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="preset-fifa" style="touch-action: none;">
+  <div id="app">
+    <!-- Top Bar Controls -->
+    <header id="top-bar">
+      <div class="header-left">
+        <div id="connection-indicator" class="disconnected">CONNECTING...</div>
+      </div>
+
+      <div class="header-center">
+        <div class="preset-switch">
+          <button id="preset-fifa" class="btn-preset active">FIFA (Stick)</button>
+          <button id="preset-tekken" class="btn-preset">Tekken (D-Pad)</button>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button id="btn-edit-mode" class="btn-header">Edit</button>
+        <button id="btn-fullscreen" class="btn-header">⛶ Fullscreen</button>
+      </div>
+    </header>
+
+    <!-- Top Shoulder Triggers (LB, LT, RB, RT) -->
+    <div id="triggers-cluster" class="control-group">
+      <div class="trigger-side left">
+        <div class="btn-gamepad trigger-btn" data-btn="lt" data-trigger="lt">LT</div>
+        <div class="btn-gamepad bumper-btn" data-btn="lb">LB</div>
+      </div>
+      <div class="center-nav">
+        <div class="btn-gamepad nav-btn" data-btn="back">BACK</div>
+        <div class="btn-gamepad nav-btn guide-btn" data-btn="guide">✛</div>
+        <div class="btn-gamepad nav-btn" data-btn="start">START</div>
+      </div>
+      <div class="trigger-side right">
+        <div class="btn-gamepad bumper-btn" data-btn="rb">RB</div>
+        <div class="btn-gamepad trigger-btn" data-btn="rt" data-trigger="rt">RT</div>
+      </div>
+    </div>
+
+    <!-- Main Gamepad Surface -->
+    <main id="gamepad-surface">
+      <!-- Left Control Group: D-Pad and Analog Stick -->
+      <div id="left-cluster" class="control-group">
+        <!-- 360 Analog Thumbstick (FIFA Primary) -->
+        <div id="analog-stick" class="stick-container">
+          <div class="stick-base">
+            <div id="stick-thumb" class="stick-thumb"></div>
+          </div>
+          <span class="stick-label">L-STICK (LS)</span>
+        </div>
+
+        <!-- 8-Way D-Pad (Tekken Primary) -->
+        <div id="dpad" class="dpad-container">
+          <div class="dpad-btn dpad-up" data-btn="dpad_up">▲</div>
+          <div class="dpad-btn dpad-left" data-btn="dpad_left">◀</div>
+          <div class="dpad-center"></div>
+          <div class="dpad-btn dpad-right" data-btn="dpad_right">▶</div>
+          <div class="dpad-btn dpad-down" data-btn="dpad_down">▼</div>
+        </div>
+      </div>
+
+      <!-- Right Control Group: Face Buttons (ABXY) -->
+      <div id="right-cluster" class="control-group">
+        <div class="face-buttons">
+          <div class="btn-gamepad face-btn btn-y" data-btn="y">
+            <span class="btn-label-fifa">Y</span>
+            <span class="btn-label-tekken">2</span>
+          </div>
+          <div class="btn-gamepad face-btn btn-x" data-btn="x">
+            <span class="btn-label-fifa">X</span>
+            <span class="btn-label-tekken">1</span>
+          </div>
+          <div class="btn-gamepad face-btn btn-b" data-btn="b">
+            <span class="btn-label-fifa">B</span>
+            <span class="btn-label-tekken">4</span>
+          </div>
+          <div class="btn-gamepad face-btn btn-a" data-btn="a">
+            <span class="btn-label-fifa">A</span>
+            <span class="btn-label-tekken">3</span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Customizer Overlay (Hidden by Default) -->
+    <div id="customizer-toolbar" class="toolbar-hidden">
+      <div class="toolbar-title">LAYOUT EDIT MODE</div>
+      <div class="toolbar-actions">
+        <button id="btn-save-layout" class="btn-action save">Save</button>
+        <button id="btn-reset-layout" class="btn-action reset">Reset</button>
+        <button id="btn-exit-edit" class="btn-action exit">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="protocol.js"></script>
+  <script src="touch_engine.js"></script>
+  <script src="customizer.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

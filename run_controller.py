@@ -7,7 +7,7 @@ Translates Android touch inputs into native Xbox 360 controller inputs on Window
 import sys
 import argparse
 from server.server import GamepadServer
-from server.virtual_gamepad import _VGAMEPAD_AVAILABLE
+from server.driver_setup import auto_setup
 
 def main():
     parser = argparse.ArgumentParser(description="Ultra-Low Latency Phone Game Controller Bridge")
@@ -22,11 +22,8 @@ def main():
     print("   Tailored for Windows 11 (Tekken, FIFA, Steam, PC Games)")
     print("=" * 60)
 
-    if not _VGAMEPAD_AVAILABLE and sys.platform.startswith('win'):
-        print("\n[!] NOTE: 'vgamepad' driver library not detected.")
-        print("    For genuine Xbox 360 controller emulation in Windows 11 games:")
-        print("    1. Download & run ViGEmBus installer: https://github.com/nefarius/ViGEmBus/releases")
-        print("    2. Install python package: pip install vgamepad\n")
+    if sys.platform.startswith('win'):
+        auto_setup()
 
     server = GamepadServer(host=args.host, port=args.port, gamepad_mode=args.mode)
     server.start()

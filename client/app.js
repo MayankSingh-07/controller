@@ -7,11 +7,19 @@
   let wakeLock = null;
   const indicator = document.getElementById('connection-indicator');
 
+  // --- Host Resolution (Supports PWA and Native APK) ---
+  function getHost() {
+    if (window.location.host && window.location.host !== '') {
+      return window.location.host;
+    }
+    return localStorage.getItem('gamepad_laptop_host') || '192.168.42.129:8080';
+  }
+
   // --- WebSocket Connection ---
   function connectWebSocket() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
-
+    const host = getHost();
+    const wsUrl = `${protocol}//${host}/ws`;
     if (indicator) {
       indicator.textContent = 'CONNECTING...';
       indicator.className = 'disconnected';
@@ -62,15 +70,16 @@
 
   // --- Bi-Directional Force Feedback (Rumble) ---
   function handleRumble(leftMotor, rightMotor) {
+    const maxMotor = Math.max(leftMotor, rightMotor);
+    if (maxMotor <= 0) return;
+    const duration = Math.round(20 + (maxMotor / 255) * 100);
+
+    // Native Android bridge support
+    if (window.AndroidNative && window.AndroidNative.vibrate) {
+      try { window.AndroidNative.vibrate(duration); return; } catch (e) {}
+    }
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
-      const maxMotor = Math.max(leftMotor, rightMotor);
-      if (maxMotor > 0) {
-        // Calculate duration based on motor intensity (20ms to 120ms)
-        const duration = Math.round(20 + (maxMotor / 255) * 100);
-        try {
-          navigator.vibrate(duration);
-        } catch (e) {}
-      }
+      try { navigator.vibrate(duration); } catch (e) {}
     }
   }
 
