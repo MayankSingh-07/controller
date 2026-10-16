@@ -96,6 +96,46 @@ class TestE2EIntegration(unittest.TestCase):
             reset_state = server.gamepad.get_current_state()
             self.assertEqual(reset_state['buttons'], 0)
             self.assertEqual(reset_state['rt'], 0)
+        finally:
+            server.stop()
 
+    def test_fragmented_socket_frame_handling(self):
+        server = GamepadServer(host="127.0.0.1", port=0, gamepad_mode="mock")
+        port = server.http_server.server_address[1]
+        server_thread = threading.Thread(target=server.http_server.serve_forever, daemon=True)
+        server_thread.start()
+        time.sleep(0.05)
+
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.connect(("127.0.0.1", port))
+            handshake = (
+                "GET /ws HTTP/1.1\r\n"
+                f"Host: 127.0.0.1:{port}\r\n"
+                "Upgrade: websocket\r\n"
+                "Connection: Upgrade\r\n"
+                "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n"
+                "Sec-WebSocket-Version: 13\r\n\r\n"
+            )
+            sock.sendall(handshake.encode('utf-8'))
+            sock.recv(1024)
+
+            payload = pack_input_frame(BTN_B, 1000, 2000, 0, 0, 50, 0)
+            mask_key = bytes([1, 2, 3, 4])
+            masked_payload = bytes(b ^ mask_key[i % 4] for i, b in enumerate(payload))
+            ws_packet = bytes([0x82, 0x8c]) + mask_key + masked_payload
+
+            # Send byte by byte with small delays to simulate fragmentation
+            for byte in ws_packet:
+                sock.sendall(bytes([byte]))
+                time.sleep(0.001)
+
+            time.sleep(0.05)
+            current = server.gamepad.get_current_state()
+            self.assertEqual(current['buttons'], BTN_B)
+            self.assertEqual(current['lx'], 1000)
+            self.assertEqual(current['ly'], 2000)
+            self.assertEqual(current['lt'], 50)
+            sock.close()
         finally:
             server.stop()

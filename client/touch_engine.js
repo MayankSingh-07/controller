@@ -54,6 +54,7 @@
       this.stickMaxRadius = 45;
 
       this.initButtons();
+      this.initDpad();
       this.initAnalogStick();
     }
 
@@ -79,13 +80,14 @@
     }
 
     initButtons() {
-      const buttonElements = document.querySelectorAll('[data-btn]');
+      const buttonElements = document.querySelectorAll('[data-btn]:not(.dpad-btn)');
       buttonElements.forEach(el => {
         const btnKey = el.getAttribute('data-btn');
         const isTrigger = el.hasAttribute('data-trigger');
         const triggerKey = el.getAttribute('data-trigger');
 
         const onPointerDown = (e) => {
+          if (window.layoutManager && window.layoutManager.isEditing) return;
           e.preventDefault();
           el.setPointerCapture?.(e.pointerId);
           el.classList.add('btn-pressed');
@@ -129,6 +131,106 @@
       });
     }
 
+    initDpad() {
+      const dpadContainer = document.getElementById('dpad');
+      if (!dpadContainer) return;
+      let dpadPointerId = null;
+
+      const updateDpad = (e) => {
+        const rect = dpadContainer.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dx = e.clientX - cx;
+        const dy = e.clientY - cy;
+        this.updateDpadFromVector(dx, dy);
+      };
+
+      const onPointerDown = (e) => {
+        if (window.layoutManager && window.layoutManager.isEditing) return;
+        e.preventDefault();
+        dpadContainer.setPointerCapture?.(e.pointerId);
+        dpadPointerId = e.pointerId;
+        this.triggerHaptic();
+        updateDpad(e);
+      };
+
+      const onPointerMove = (e) => {
+        if (e.pointerId !== dpadPointerId) return;
+        e.preventDefault();
+        updateDpad(e);
+      };
+
+      const onPointerUp = (e) => {
+        if (e.pointerId !== dpadPointerId) return;
+        e.preventDefault();
+        dpadPointerId = null;
+        this.clearDpad();
+      };
+
+      dpadContainer.addEventListener('pointerdown', onPointerDown, { passive: false });
+      dpadContainer.addEventListener('pointermove', onPointerMove, { passive: false });
+      dpadContainer.addEventListener('pointerup', onPointerUp, { passive: false });
+      dpadContainer.addEventListener('pointercancel', onPointerUp, { passive: false });
+    }
+
+    updateDpadFromVector(dx, dy) {
+      const dist = Math.hypot(dx, dy);
+      const dpadMask = DPAD_UP | DPAD_DOWN | DPAD_LEFT | DPAD_RIGHT;
+      this.buttons &= ~dpadMask;
+
+      const upEl = document.querySelector('.dpad-up');
+      const downEl = document.querySelector('.dpad-down');
+      const leftEl = document.querySelector('.dpad-left');
+      const rightEl = document.querySelector('.dpad-right');
+
+      [upEl, downEl, leftEl, rightEl].forEach(el => el && el.classList.remove('btn-pressed'));
+
+      if (dist < 15) {
+        this.dispatchState();
+        return;
+      }
+
+      const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+      if (angle >= -22.5 && angle < 22.5) {
+        this.buttons |= DPAD_RIGHT;
+        rightEl && rightEl.classList.add('btn-pressed');
+      } else if (angle >= 22.5 && angle < 67.5) {
+        this.buttons |= (DPAD_DOWN | DPAD_RIGHT);
+        downEl && downEl.classList.add('btn-pressed');
+        rightEl && rightEl.classList.add('btn-pressed');
+      } else if (angle >= 67.5 && angle < 112.5) {
+        this.buttons |= DPAD_DOWN;
+        downEl && downEl.classList.add('btn-pressed');
+      } else if (angle >= 112.5 && angle < 157.5) {
+        this.buttons |= (DPAD_DOWN | DPAD_LEFT);
+        downEl && downEl.classList.add('btn-pressed');
+        leftEl && leftEl.classList.add('btn-pressed');
+      } else if (angle >= 157.5 || angle < -157.5) {
+        this.buttons |= DPAD_LEFT;
+        leftEl && leftEl.classList.add('btn-pressed');
+      } else if (angle >= -157.5 && angle < -112.5) {
+        this.buttons |= (DPAD_UP | DPAD_LEFT);
+        upEl && upEl.classList.add('btn-pressed');
+        leftEl && leftEl.classList.add('btn-pressed');
+      } else if (angle >= -112.5 && angle < -67.5) {
+        this.buttons |= DPAD_UP;
+        upEl && upEl.classList.add('btn-pressed');
+      } else if (angle >= -67.5 && angle < -22.5) {
+        this.buttons |= (DPAD_UP | DPAD_RIGHT);
+        upEl && upEl.classList.add('btn-pressed');
+        rightEl && rightEl.classList.add('btn-pressed');
+      }
+
+      this.dispatchState();
+    }
+
+    clearDpad() {
+      const dpadMask = DPAD_UP | DPAD_DOWN | DPAD_LEFT | DPAD_RIGHT;
+      this.buttons &= ~dpadMask;
+      document.querySelectorAll('.dpad-btn').forEach(el => el.classList.remove('btn-pressed'));
+      this.dispatchState();
+    }
+
     initAnalogStick() {
       const stickContainer = document.getElementById('analog-stick');
       const stickThumb = document.getElementById('stick-thumb');
@@ -137,6 +239,7 @@
       const base = stickContainer.querySelector('.stick-base');
 
       const onPointerDown = (e) => {
+        if (window.layoutManager && window.layoutManager.isEditing) return;
         if (this.stickPointerId !== null) return;
         e.preventDefault();
         base.setPointerCapture?.(e.pointerId);

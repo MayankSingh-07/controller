@@ -20,6 +20,16 @@ class ControllerHTTPHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=CLIENT_DIR, **kwargs)
 
+    @staticmethod
+    def _recv_exact(sock: socket.socket, n: int) -> Optional[bytes]:
+        buf = bytearray()
+        while len(buf) < n:
+            chunk = sock.recv(n - len(buf))
+            if not chunk:
+                return None
+            buf.extend(chunk)
+        return bytes(buf)
+
     def do_GET(self):
         # Check for WebSocket Upgrade
         if self.path.startswith('/ws') and self.headers.get('Upgrade', '').lower() == 'websocket':
@@ -56,9 +66,8 @@ class ControllerHTTPHandler(SimpleHTTPRequestHandler):
 
         try:
             while not server_instance.stop_event.is_set():
-                # Read 2-byte frame header
-                header = sock.recv(2)
-                if not header or len(header) < 2:
+                header = self._recv_exact(sock, 2)
+                if not header:
                     break
 
                 b1, b2 = header[0], header[1]
@@ -70,18 +79,23 @@ class ControllerHTTPHandler(SimpleHTTPRequestHandler):
                     break
 
                 if length == 126:
-                    length = struct.unpack('>H', sock.recv(2))[0]
-                elif length == 127:
-                    length = struct.unpack('>Q', sock.recv(8))[0]
-
-                mask = sock.recv(4) if is_masked else b''
-                payload = b''
-                while len(payload) < length:
-                    chunk = sock.recv(length - len(payload))
-                    if not chunk:
+                    len_bytes = self._recv_exact(sock, 2)
+                    if not len_bytes:
                         break
-                    payload += chunk
+                    length = struct.unpack('>H', len_bytes)[0]
+                elif length == 127:
+                    len_bytes = self._recv_exact(sock, 8)
+                    if not len_bytes:
+                        break
+                    length = struct.unpack('>Q', len_bytes)[0]
 
+                mask = self._recv_exact(sock, 4) if is_masked else b''
+                if is_masked and not mask:
+                    break
+
+                payload = self._recv_exact(sock, length)
+                if payload is None:
+                    break
                 if is_masked and mask:
                     payload = bytes(b ^ mask[i % 4] for i, b in enumerate(payload))
 

@@ -16,3 +16,9 @@ class TestClientAssets(unittest.TestCase):
         self.assertIn('preset-fifa', content)
         self.assertIn('id="btn-fullscreen"', content)
         self.assertIn('id="connection-indicator"', content)
+
+    def test_touch_engine_implements_diagonal_dpad_and_edit_guard(self):
+        with open('client/touch_engine.js', 'r') as f:
+            content = f.read()
+        self.assertIn('updateDpadFromVector', content)
+        self.assertIn('isEditing', content)
