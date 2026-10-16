@@ -181,7 +181,14 @@ class GamepadServer:
                     pass
             self.clients.clear()
         self.gamepad.close()
-        self.http_server.server_close()
+        try:
+            self.http_server.shutdown()
+        except Exception:
+            pass
+        try:
+            self.http_server.server_close()
+        except Exception:
+            pass
 
 
 def start_server(host: str = "0.0.0.0", port: int = 8080, gamepad_mode: str = "auto"):

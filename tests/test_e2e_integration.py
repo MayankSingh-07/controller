@@ -98,6 +98,7 @@ class TestE2EIntegration(unittest.TestCase):
             self.assertEqual(reset_state['rt'], 0)
         finally:
             server.stop()
+            server_thread.join(timeout=1.0)
 
     def test_fragmented_socket_frame_handling(self):
         server = GamepadServer(host="127.0.0.1", port=0, gamepad_mode="mock")
@@ -139,3 +140,4 @@ class TestE2EIntegration(unittest.TestCase):
             sock.close()
         finally:
             server.stop()
+            server_thread.join(timeout=1.0)

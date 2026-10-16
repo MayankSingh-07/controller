@@ -63,6 +63,8 @@ class VirtualGamepadBridge:
         if self.mode == "vgamepad" and _VGAMEPAD_AVAILABLE:
             try:
                 self.device = vg.VX360Gamepad()
+                print("\n[✓] Virtual Xbox 360 controller connected! (ViGEmBus)")
+                print("    FIFA, Tekken, Steam, and Windows PC games will recognize it automatically.\n")
                 if self.on_rumble:
                     def _notification_cb(client, target, large_motor, small_motor, led_number, user_data):
                         # Convert 0..65535 or 0..255 to 0..255 uint8
@@ -73,7 +75,10 @@ class VirtualGamepadBridge:
             except Exception as e:
                 print(f"[VirtualGamepad] Failed to initialize VX360Gamepad: {e}. Falling back to mock mode.")
                 self.mode = "mock"
-
+        elif self.mode == "mock" and sys.platform.startswith('win'):
+            print("\n[!] WARNING: Running in MOCK mode (vgamepad driver library not loaded).")
+            print("    Controller inputs will NOT reach Windows games.")
+            print("    To fix: run 'pip install vgamepad'\n")
         self._button_map = {}
         if self.mode == "vgamepad" and self.device:
             self._button_map = {

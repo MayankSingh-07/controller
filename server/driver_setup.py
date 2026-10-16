@@ -79,7 +79,7 @@ def ensure_dependencies() -> bool:
         if sys.platform.startswith('win'):
             print("\n[*] Installing required gamepad driver package (vgamepad)...")
             try:
-                subprocess.check_call([sys.executable, "-m", "pip", "install", "vgamepad>=0.3.3"])
+                subprocess.check_call([sys.executable, "-m", "pip", "install", "vgamepad"])
                 print("[✓] 'vgamepad' installed successfully!")
                 return True
             except Exception as e:
