@@ -1,4 +1,5 @@
 @echo off
+setlocal enabledelayedexpansion
 title Phone Game Controller - Auto Setup
 color 0b
 echo ====================================================================
@@ -6,10 +7,18 @@ echo   PHONE GAME CONTROLLER - 1-CLICK AUTOMATED SETUP FOR WINDOWS 11
 echo ====================================================================
 echo.
 
-:: 1. Check Python installation
-where python >nul 2>nul
-if %errorlevel% neq 0 (
-    echo [ERROR] Python is not installed.
+:: Detect Python executable (handles Scoop, Py launcher, standard Python)
+set "PYTHON_EXE="
+where python >nul 2>nul && set "PYTHON_EXE=python"
+if not defined PYTHON_EXE (
+    where py >nul 2>nul && set "PYTHON_EXE=py"
+)
+if not defined PYTHON_EXE (
+    where python3 >nul 2>nul && set "PYTHON_EXE=python3"
+)
+
+if not defined PYTHON_EXE (
+    echo [ERROR] Python was not found in your PATH.
     echo Opening Python download page...
     start https://www.python.org/downloads/
     echo Please install Python (make sure to check "Add python.exe to PATH") and run setup.bat again.
@@ -17,20 +26,19 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-echo [*] Python detected.
-echo [*] Installing / updating required libraries...
-python -m pip install --upgrade pip >nul 2>nul
-python -m pip install -r requirements.txt
+echo [*] Using Python executable: %PYTHON_EXE%
+echo [*] Installing required gamepad driver library (vgamepad)...
+%PYTHON_EXE% -m pip install vgamepad
 
 echo.
-echo [*] Checking and configuring Windows Gamepad Driver (ViGEmBus)...
-python -c "from server.driver_setup import auto_setup; auto_setup()"
+echo [*] Verifying Windows Gamepad Driver (ViGEmBus)...
+%PYTHON_EXE% -c "from server.driver_setup import auto_setup; auto_setup()"
 
 echo.
 echo ====================================================================
 echo   [SUCCESS] Setup complete! Starting controller bridge...
 echo ====================================================================
 echo.
-python run_controller.py %*
+%PYTHON_EXE% run_controller.py %*
 
 pause
