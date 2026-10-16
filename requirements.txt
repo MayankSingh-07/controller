@@ -1,0 +1,1 @@
+vgamepad>=0.3.3; sys_platform == 'win32'
