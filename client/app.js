@@ -124,6 +124,9 @@
   // Initialize on load
   window.addEventListener('DOMContentLoaded', () => {
     touchEngine = new TouchEngine(sendPacket);
+    if (typeof LayoutManager !== 'undefined') {
+      window.layoutManager = new LayoutManager();
+    }
     connectWebSocket();
   });
 })();
